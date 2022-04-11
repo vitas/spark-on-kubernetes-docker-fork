@@ -1,8 +1,7 @@
 ARG LIVY_BUILDER_TAG=latest
 ARG DD_TAG=latest
 
-### Builder Container
-FROM 878256633362.dkr.ecr.us-west-2.amazonaws.com/livy-builder:${LIVY_BUILDER_TAG} as build
+FROM vitass/livy-builder:0.3 as build
 
 ARG aws_bundle_version=1.11.1001
 RUN mvn dependency:copy -Dartifact=com.amazonaws:aws-java-sdk-bundle:${aws_bundle_version} -DoutputDirectory=/tmp
@@ -18,17 +17,14 @@ RUN cd / && \
         -Phive && \
     cp spark-3.1.1-bin-hadoop-3.2.0-cloud-scala-2.12.tgz /
 
-# Pull dd-spark-metrics image to get the JAR inside in a later COPY --from=metrics
-FROM 878256633362.dkr.ecr.us-west-2.amazonaws.com/dd-spark-metrics:${DD_TAG} as metrics
-
 ### Final Container
 ARG java_image_tag=11-jre-slim
 
 FROM openjdk:11-jre-slim
 
-LABEL maintainer="Jerome Banks <jerome@tatari.tv>"
+LABEL maintainer="Vitalis Green <vr@samebits.com>"
 
-ENV BASE_IMAGE      openjdk:${java_image_tag}
+ENV BASE_IMAGE openjdk:${java_image_tag}
 
 RUN set -ex && \
     sed -i 's/http:/https:/g' /etc/apt/sources.list && \
@@ -74,7 +70,6 @@ RUN tar -xzf /spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}-scala-${SCALA_VERSION
     rm $SPARK_HOME/jars/aws-java-sdk-bundle*.jar && \
     cp /aws-java-sdk-bundle-*.jar $SPARK_HOME/jars
 
-COPY --from=metrics /usr/src/dd-spark-metrics/target/scala-2.12/dd-spark-metrics-*.jar $SPARK_HOME/jars
 
 # install Conda (https://github.com/jupyter/docker-stacks/blob/6d42503c684f3de9b17ce92a6b0c952ef2d1ecd8/base-notebook/Dockerfile#L78-L101)
 RUN mkdir -p $CONDA_DIR && \

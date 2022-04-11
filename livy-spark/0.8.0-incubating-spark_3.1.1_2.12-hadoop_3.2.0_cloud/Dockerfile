@@ -1,10 +1,10 @@
-ARG LIVY_BUILDER_TAG=latest
-ARG SPARK_TAG=latest
+ARG SPARK_BASE=vitass/spark:3.1.1_2.12-hadoop_3.2.0_cloud
+ARG LIVY_BUILDER=vitas/livy-builder:0.3
 
 ### Livy Builder Container
-FROM 878256633362.dkr.ecr.us-west-2.amazonaws.com/livy-builder:${LIVY_BUILDER_TAG} as build
+FROM $LIVY_BUILDER as build
 
-ARG LIVY_GITHUB_REPO=tatari-tv/incubator-livy
+ARG LIVY_GITHUB_REPO=vitass/incubator-livy
 ARG LIVY_GITHUB_BRANCH=master
 
 RUN git clone https://github.com/${LIVY_GITHUB_REPO}.git --branch ${LIVY_GITHUB_BRANCH} --single-branch --depth=50 && \
@@ -18,11 +18,11 @@ RUN git clone https://github.com/${LIVY_GITHUB_REPO}.git --branch ${LIVY_GITHUB_
     cp assembly/target/apache-livy-0.8.0-incubating-SNAPSHOT-bin.zip /
 
 ### Final Container
-FROM 878256633362.dkr.ecr.us-west-2.amazonaws.com/spark:${SPARK_TAG}
+FROM $SPARK_BASE
 
 ARG LIVY_VERSION_ARG=0.8.0-incubating-SNAPSHOT
 
-LABEL maintainer="Jerome Banks <jerome@tatari.tv>"
+LABEL maintainer="Vitalis Green <vr@samebits.com>"
 
 ENV LIVY_VERSION            $LIVY_VERSION_ARG
 ENV LIVY_HOME               /opt/livy

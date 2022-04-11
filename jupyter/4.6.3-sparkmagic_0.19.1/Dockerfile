@@ -1,12 +1,12 @@
 # https://github.com/jupyter/docker-stacks/tree/6d42503c684f3de9b17ce92a6b0c952ef2d1ecd8/scipy-notebook
-# https://github.com/jupyter-incubator/sparkmagic/blob/0.15.0/Dockerfile.jupyter
+# https://github.com/jupyter-incubator/sparkmagic/blob/0.19.1/Dockerfile.jupyter
 
 
-ARG BASE_CONTAINER=jupyter/scipy-notebook:6d42503c684f
+ARG BASE_CONTAINER=jupyter/scipy-notebook:hub-1.5.0
 
 FROM $BASE_CONTAINER
 
-LABEL maintainer="Jerome Banks <jerome@tatari.tv>"
+LABEL maintainer="Vitalis Green <vr@samebits.com>"
 
 # Install Sparkmagic kernel
 # https://github.com/jupyter-incubator/sparkmagic/blob/master/Dockerfile.jupyter
@@ -19,7 +19,7 @@ USER $NB_UID
 
 RUN pip install --upgrade pip && \
     pip install --upgrade --ignore-installed setuptools && \
-    pip install sparkmagic==0.15.0
+    pip install sparkmagic==0.19.1
 
 RUN mkdir -p /home/$NB_USER/.sparkmagic
 COPY sparkmagic/example_config.json /home/$NB_USER/.sparkmagic/config.json

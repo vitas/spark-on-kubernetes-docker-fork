@@ -1,7 +1,8 @@
-ARG LIVY_SPARK_TAG=latest
-FROM 878256633362.dkr.ecr.us-west-2.amazonaws.com/livy-spark:${LIVY_SPARK_TAG}
+ARG SPARK_BASE=vitass/livy-spark:0.8.0-incubating-spark_3.1.1_2.12-hadoop_3.2.0_cloud
 
-LABEL maintainer="Jerome Banks <jerome@tatari.tv>"
+FROM $SPARK_BASE
+
+LABEL maintainer="Vitalis Green <vr@samebits.com>"
 
 RUN cp $LIVY_CONF_DIR/log4j.properties.template $LIVY_CONF_DIR/log4j.properties && \
     mkdir -p $LIVY_HOME/work-dir && \
