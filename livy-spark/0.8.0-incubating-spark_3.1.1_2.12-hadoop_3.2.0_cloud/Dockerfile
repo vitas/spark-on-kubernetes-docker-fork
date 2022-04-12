@@ -1,5 +1,5 @@
 ARG SPARK_BASE=vitass/spark:3.1.1_2.12-hadoop_3.2.0_cloud
-ARG LIVY_BUILDER=vitas/livy-builder:0.3
+ARG LIVY_BUILDER=vitass/livy-builder:0.3
 
 ### Livy Builder Container
 FROM $LIVY_BUILDER as build
