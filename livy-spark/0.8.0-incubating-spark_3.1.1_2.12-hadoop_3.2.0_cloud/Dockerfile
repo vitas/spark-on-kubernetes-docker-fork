@@ -4,7 +4,7 @@ ARG LIVY_BUILDER=vitass/livy-builder:0.3
 ### Livy Builder Container
 FROM $LIVY_BUILDER as build
 
-ARG LIVY_GITHUB_REPO=vitass/incubator-livy
+ARG LIVY_GITHUB_REPO=vitas/incubator-livy
 ARG LIVY_GITHUB_BRANCH=master
 
 RUN git clone https://github.com/${LIVY_GITHUB_REPO}.git --branch ${LIVY_GITHUB_BRANCH} --single-branch --depth=50 && \
