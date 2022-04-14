@@ -1,13 +1,10 @@
-ARG LIVY_BUILDER_TAG=latest
-ARG DD_TAG=latest
-
 FROM vitass/livy-builder:0.3 as build
 
 ARG aws_bundle_version=1.11.1001
 RUN mvn dependency:copy -Dartifact=com.amazonaws:aws-java-sdk-bundle:${aws_bundle_version} -DoutputDirectory=/tmp
 
 RUN cd / && \
-    git clone https://github.com/apache/spark.git --branch v3.1.1 --single-branch && \
+    git clone https://github.com/apache/spark.git --branch v3.1.3 --single-branch && \
     cd /spark && \
     dev/make-distribution.sh \
         --name hadoop-3.2.0-cloud-scala-2.12 --pip --tgz -DskipTests \
@@ -15,14 +12,14 @@ RUN cd / && \
         -Phadoop-cloud \
         -Pkubernetes \
         -Phive && \
-    cp spark-3.1.1-bin-hadoop-3.2.0-cloud-scala-2.12.tgz /
+    cp spark-3.1.3-bin-hadoop-3.2.0-cloud-scala-2.12.tgz 
 
 ### Final Container
 ARG java_image_tag=11-jre-slim
 
-FROM openjdk:11-jre-slim
-
 LABEL maintainer="Vitalis Green <vr@samebits.com>"
+
+FROM openjdk:11-jre-slim
 
 ENV BASE_IMAGE openjdk:${java_image_tag}
 
@@ -37,7 +34,7 @@ RUN set -ex && \
     chgrp root /etc/passwd && chmod ug+rw /etc/passwd && \
     rm -rf /var/cache/apt/*
 
-ENV SPARK_VERSION   3.1.1
+ENV SPARK_VERSION   3.1.3
 ENV HADOOP_VERSION  hadoop-3.2.0-cloud
 ENV SCALA_VERSION   2.12
 
