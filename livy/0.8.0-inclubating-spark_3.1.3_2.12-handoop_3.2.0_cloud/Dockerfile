@@ -18,5 +18,5 @@ COPY Dockerfile /my_docker/
 EXPOSE 8998 10000
 
 WORKDIR $LIVY_HOME/work-dir
-
+RUN chmod +x /opt/entrypoint.sh
 ENTRYPOINT [ "/opt/entrypoint.sh" ]
