@@ -52,6 +52,7 @@ RUN  wget --content-disposition https://archive.apache.org/dist/spark/spark-${SP
   mkdir -p /opt/spark-${SPARK_VERSION}-bin-hadoop3.2/cluster-conf && \
   chmod g+w /opt/spark-${SPARK_VERSION}-bin-hadoop3.2/work-dir && \
   cp /aws-java-sdk-bundle-*.jar /opt/spark-${SPARK_VERSION}-bin-hadoop3.2/jars && \
+  wget -O /opt/spark-${SPARK_VERSION}-bin-hadoop3.2/jars/hadoop-aws-3.2.0.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.2.0/hadoop-aws-3.2.0.jar && \
   ln -s /opt/spark-${SPARK_VERSION}-bin-hadoop3.2 ${SPARK_HOME}
 
 COPY conf/* $SPARK_CONF_DIR/
