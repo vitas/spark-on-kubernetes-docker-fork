@@ -6,6 +6,7 @@ FROM $LIVY_BUILDER as build
 
 ARG LIVY_GITHUB_REPO=vitas/incubator-livy
 ARG LIVY_GITHUB_BRANCH=master
+ENV MAVEN_OPTS="-Xss128m -Xmx3g -XX:ReservedCodeCacheSize=2g"
 
 RUN git clone https://github.com/${LIVY_GITHUB_REPO}.git --branch ${LIVY_GITHUB_BRANCH} --single-branch --depth=50 && \
     cd incubator-livy && \
@@ -14,8 +15,8 @@ RUN git clone https://github.com/${LIVY_GITHUB_REPO}.git --branch ${LIVY_GITHUB_
         -Pthriftserver \
         -DskipTests \
         -DskipITs \
-        -Dmaven.javadoc.skip=true && \
-    cp assembly/target/apache-livy-0.8.0-incubating-SNAPSHOT-bin.zip /
+        -Dmaven.javadoc.skip=true
+RUN cp assembly/target/apache-livy-0.8.0-incubating-SNAPSHOT-bin.zip /
 
 ### Final Container
 FROM $SPARK_BASE

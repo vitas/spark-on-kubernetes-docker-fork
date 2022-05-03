@@ -1,6 +1,6 @@
 FROM vitass/livy-builder:0.3 as build
 
-ARG aws_bundle_version=1.11.1001
+ARG aws_bundle_version=1.12.210
 RUN mvn dependency:copy -Dartifact=com.amazonaws:aws-java-sdk-bundle:${aws_bundle_version} -DoutputDirectory=/tmp
 
 ARG java_image_tag=11-jre-slim
@@ -36,11 +36,8 @@ ENV SHELL           /bin/bash
 
 ENV PATH            $PATH:$SPARK_HOME/bin:$CONDA_DIR/bin
 
-ARG MINICONDA_VERSION=4.8.3
-ARG MINICONDA_MD5=d63adf39f2c220950a063e0529d4ff74
-ARG CONDA_VERSION=4.8.3
-ARG PYTHON_VERSION=3.7.8
 
+ARG PYTHON_VERSION=3.7
 ARG spark_uid=185
 
 COPY --from=build /tmp/aws-java-sdk-bundle-*.jar /
@@ -54,6 +51,35 @@ RUN  wget --content-disposition https://archive.apache.org/dist/spark/spark-${SP
   cp /aws-java-sdk-bundle-*.jar /opt/spark-${SPARK_VERSION}-bin-hadoop3.2/jars && \
   wget -O /opt/spark-${SPARK_VERSION}-bin-hadoop3.2/jars/hadoop-aws-3.2.0.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.2.0/hadoop-aws-3.2.0.jar && \
   ln -s /opt/spark-${SPARK_VERSION}-bin-hadoop3.2 ${SPARK_HOME}
+
+ARG CONDA_MIRROR=https://github.com/conda-forge/miniforge/releases/latest/download
+
+RUN mkdir -p $CONDA_DIR && set -x && \
+    # Miniforge installer
+    miniforge_arch=$(uname -m) && \
+    miniforge_installer="Mambaforge-Linux-${miniforge_arch}.sh" && \
+    wget --quiet "${CONDA_MIRROR}/${miniforge_installer}" && \
+    /bin/bash "${miniforge_installer}" -f -b -p "${CONDA_DIR}" && \
+    rm "${miniforge_installer}" && \
+    # Conda configuration see https://conda.io/projects/conda/en/latest/configuration.html
+    conda config --system --set auto_update_conda false && \
+    conda config --system --set show_channel_urls true && \
+    if [[ "${PYTHON_VERSION}" != "default" ]]; then mamba install --quiet --yes python="${PYTHON_VERSION}"; fi && \
+    # Pin major.minor version of python
+    mamba list python | grep '^python ' | tr -s ' ' | cut -d ' ' -f 1,2 >> "${CONDA_DIR}/conda-meta/pinned" && \
+    # Using conda to update all packages: https://github.com/mamba-org/mamba/issues/1092
+    conda update --all --quiet --yes && \
+    conda clean --all -f -y 
+
+# Using fixed version of mamba in arm, because the latest one has problems with arm under qemu
+# See: https://github.com/jupyter/docker-stacks/issues/1539
+RUN set -x && \
+    arch=$(uname -m) && \
+    if [ "${arch}" == "aarch64" ]; then \
+        mamba install --quiet --yes \
+            'mamba<0.18' && \
+            mamba clean --all -f -y; \
+    fi;
 
 COPY conf/* $SPARK_CONF_DIR/
 # $SPARK_HOME/conf gets cleaned by Spark on Kubernetes internals, create and add to classpath another directory for logging and other configs
