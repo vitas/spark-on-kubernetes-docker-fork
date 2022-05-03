@@ -25,5 +25,5 @@ RUN apt-get -qq update && \
 ENV M2_HOME=/opt/maven
 ENV MAVEN_HOME=/opt/maven
 ENV PATH=${PATH}:${M2_HOME}/bin
-ENV MAVEN_OPTS="-Xss64m -Xmx2g -XX:ReservedCodeCacheSize=1g"
+ENV MAVEN_OPTS="-Xss128m -Xmx3g -XX:ReservedCodeCacheSize=1g"
 

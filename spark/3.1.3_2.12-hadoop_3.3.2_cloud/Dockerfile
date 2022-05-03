@@ -1,6 +1,6 @@
 FROM vitass/livy-builder:0.3 as build
 
-ARG aws_bundle_version=1.11.1034
+ARG aws_bundle_version=1.12.210
 RUN mvn dependency:copy -Dartifact=com.amazonaws:aws-java-sdk-bundle:${aws_bundle_version} -DoutputDirectory=/tmp
 
 ARG java_image_tag=11-jre-slim
@@ -23,10 +23,11 @@ RUN set -ex && \
     rm -rf /var/cache/apt/*
 
 ENV SPARK_VERSION   3.1.3
-ENV HADOOP_VERSION  hadoop-3.2.0-cloud
+ARG hadoop_version=3.3.2
 ENV SCALA_VERSION   2.12
 
 ENV SPARK_HOME      /opt/spark
+ENV HADOOP_HOME     /opt/hadoop
 ENV SPARK_CONF_DIR  $SPARK_HOME/conf
 ENV SPARK_CLASSPATH $SPARK_HOME/cluster-conf
 
@@ -40,17 +41,27 @@ ENV PATH            $PATH:$SPARK_HOME/bin:$CONDA_DIR/bin
 ARG PYTHON_VERSION=3.7
 ARG spark_uid=185
 
-COPY --from=build /tmp/aws-java-sdk-bundle-*.jar /
-RUN  wget --content-disposition https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.2.tgz -O /tmp/spark-${SPARK_VERSION}-bin-hadoop3.2.tgz && \
-  tar -xvzf /tmp/spark-${SPARK_VERSION}-bin-hadoop3.2.tgz -C /opt/ && \
-  rm -f /tmp/spark-${SPARK_VERSION}-bin-hadoop3.2.tgz && \
-  mkdir -p /opt/spark-${SPARK_VERSION}-bin-hadoop3.2/work-dir && \
-  mkdir -p /opt/spark-${SPARK_VERSION}-bin-hadoop3.2/spark-warehouse && \
-  mkdir -p /opt/spark-${SPARK_VERSION}-bin-hadoop3.2/cluster-conf && \
-  chmod g+w /opt/spark-${SPARK_VERSION}-bin-hadoop3.2/work-dir && \
-  cp /aws-java-sdk-bundle-*.jar /opt/spark-${SPARK_VERSION}-bin-hadoop3.2/jars && \
-  wget -O /opt/spark-${SPARK_VERSION}-bin-hadoop3.2/jars/hadoop-aws-3.2.0.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.2.0/hadoop-aws-3.2.0.jar && \
-  ln -s /opt/spark-${SPARK_VERSION}-bin-hadoop3.2 ${SPARK_HOME}
+RUN  wget --content-disposition https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz -O /tmp/spark-${SPARK_VERSION}-bin-without-hadoop.tgz && \
+  tar -xvzf /tmp/spark-${SPARK_VERSION}-bin-without-hadoop.tgz -C /opt/ && \
+  rm -f /tmp/spark-${SPARK_VERSION}-bin-without-hadoop.tgz && \
+  mkdir -p /opt/spark-${SPARK_VERSION}-bin-without-hadoop/work-dir && \
+  mkdir -p /opt/spark-${SPARK_VERSION}-bin-without-hadoop/spark-warehouse && \
+  mkdir -p /opt/spark-${SPARK_VERSION}-bin-without-hadoop/cluster-conf && \
+  chmod g+w /opt/spark-${SPARK_VERSION}-bin-without-hadoop/work-dir && \
+  ln -s /opt/spark-${SPARK_VERSION}-bin-without-hadoop ${SPARK_HOME}
+
+RUN  wget --content-disposition https://downloads.apache.org/hadoop/common/hadoop-${hadoop_version}/hadoop-${hadoop_version}.tar.gz -O /tmp/hadoop-${hadoop_version}.tar.gz && \
+  tar -xvzf /tmp/hadoop-${hadoop_version}.tar.gz -C /opt/ && \
+  ln -s /opt/hadoop-${hadoop_version} ${HADOOP_HOME} && \
+  rm -rf ${HADOOP_HOME}/share/doc && \
+  rm ${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-*.jar 
+# replace with new aws libs
+COPY --from=build /tmp/aws-java-sdk-bundle-*.jar ${HADOOP_HOME}/share/hadoop/tools/lib/
+
+ENV SPARK_DIST_CLASSPATH="$HADOOP_HOME/etc/hadoop:$HADOOP_HOME/share/hadoop/common/lib/*:$HADOOP_HOME/share/hadoop/common/*:$HADOOP_HOME/share/hadoop/hdfs:$HADOOP_HOME/share/hadoop/hdfs/lib/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/yarn:$HADOOP_HOME/share/hadoop/yarn/lib/*:$HADOOP_HOME/share/hadoop/yarn/*:$HADOOP_HOME/share/hadoop/mapreduce/lib/*:$HADOOP_HOME/share/hadoop/mapreduce/*:/contrib/capacity-scheduler/*.jar:$HADOOP_HOME/share/hadoop/tools/lib/*"
+ENV SPARK_EXTRA_CLASSPATH="$SPARK_DIST_CLASSPATH"
+ENV LD_LIBRARY_PATH /lib64
+
 
 ARG CONDA_MIRROR=https://github.com/conda-forge/miniforge/releases/latest/download
 

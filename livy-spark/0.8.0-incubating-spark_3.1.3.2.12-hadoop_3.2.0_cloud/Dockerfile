@@ -6,7 +6,7 @@ FROM $LIVY_BUILDER as build
 
 ARG LIVY_GITHUB_REPO=vitas/incubator-livy
 ARG LIVY_GITHUB_BRANCH=master
-ENV MAVEN_OPTS="-Xss128m -Xmx3g -XX:ReservedCodeCacheSize=2g"
+ENV MAVEN_OPTS "-Xmx4G -XX:MaxPermSize=1G"
 
 RUN git clone https://github.com/${LIVY_GITHUB_REPO}.git --branch ${LIVY_GITHUB_BRANCH} --single-branch --depth=50 && \
     cd incubator-livy && \
