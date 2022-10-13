@@ -37,7 +37,7 @@ ENV SHELL           /bin/bash
 ENV PATH            $PATH:$SPARK_HOME/bin:$CONDA_DIR/bin
 
 
-ARG PYTHON_VERSION=3.7
+ARG PYTHON_VERSION=3.8
 ARG spark_uid=185
 
 COPY --from=build /tmp/aws-java-sdk-bundle-*.jar /
