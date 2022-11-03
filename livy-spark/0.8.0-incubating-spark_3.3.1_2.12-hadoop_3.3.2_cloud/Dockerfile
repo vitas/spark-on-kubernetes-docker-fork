@@ -11,7 +11,8 @@ ARG LIVY_GITHUB_BRANCH=master
 RUN git clone https://github.com/${LIVY_GITHUB_REPO}.git --branch ${LIVY_GITHUB_BRANCH} --single-branch --depth=50 && \
     cd incubator-livy && \
     mvn clean package -B -V -e \
-        -Pspark-3.3 \
+        -Pscala-2.12 \
+        -Pspark-3.3.1 \
         -Pthriftserver \
         -DskipTests \
         -DskipITs \
