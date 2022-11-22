@@ -19,7 +19,7 @@ USER $NB_UID
 
 RUN pip install --upgrade pip && \
     pip install --upgrade --ignore-installed setuptools && \
-    pip install sparkmagic==0.19.1
+    pip install sparkmagic==0.20.0
 
 RUN mkdir -p /home/$NB_USER/.sparkmagic
 COPY sparkmagic/example_config.json /home/$NB_USER/.sparkmagic/config.json

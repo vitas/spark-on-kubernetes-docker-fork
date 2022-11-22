@@ -84,6 +84,8 @@ RUN set -x && \
 COPY conf/* $SPARK_CONF_DIR/
 # $SPARK_HOME/conf gets cleaned by Spark on Kubernetes internals, create and add to classpath another directory for logging and other configs
 COPY conf/* $SPARK_HOME/cluster-conf/
+#Java fix - replace commons-text to safe version
+COPY java_fix/commons-text-1.10.0.jr $SPARK_HOME/jars/commons-text-1.9.jar 
 COPY entrypoint.sh /opt/
 COPY Dockerfile /my_docker/
 
