@@ -50,6 +50,7 @@ RUN  wget --content-disposition https://archive.apache.org/dist/spark/spark-${SP
   chmod g+w /opt/spark-${SPARK_VERSION}-bin-hadoop3/work-dir && \
   cp /aws-java-sdk-bundle-*.jar /opt/spark-${SPARK_VERSION}-bin-hadoop3/jars && \
   wget -O /opt/spark-${SPARK_VERSION}-bin-hadoop3/jars/hadoop-aws-${HADOOP_VERSION}.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_VERSION}/hadoop-aws-${HADOOP_VERSION}.jar && \
+  wget -O /opt/spark-${SPARK_VERSION}-bin-hadoop3/jars/commons-text-1.9.jar https://repo1.maven.org/maven2/org/apache/commons/commons-text/1.10.0/commons-text-1.10.0.jar && \
   ln -s /opt/spark-${SPARK_VERSION}-bin-hadoop3 ${SPARK_HOME}
 
 ARG CONDA_MIRROR=https://github.com/conda-forge/miniforge/releases/latest/download
@@ -84,8 +85,6 @@ RUN set -x && \
 COPY conf/* $SPARK_CONF_DIR/
 # $SPARK_HOME/conf gets cleaned by Spark on Kubernetes internals, create and add to classpath another directory for logging and other configs
 COPY conf/* $SPARK_HOME/cluster-conf/
-#Java fix - replace commons-text to safe version
-COPY java_fix/commons-text-1.10.0.jr $SPARK_HOME/jars/commons-text-1.9.jar 
 COPY entrypoint.sh /opt/
 COPY Dockerfile /my_docker/
 

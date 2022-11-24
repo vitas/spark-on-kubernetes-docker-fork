@@ -9,6 +9,7 @@ RUN cp $LIVY_CONF_DIR/log4j.properties.template $LIVY_CONF_DIR/log4j.properties 
     mkdir /var/log/livy && \
     ln -s /var/log/livy $LIVY_HOME/logs
 
+RUN  wget -O $LIVY_HOME/jars/commons-text-1.9.jar https://repo1.maven.org/maven2/org/apache/commons/commons-text/1.10.0/commons-text-1.10.0.jar 
 COPY conf/* $LIVY_CONF_DIR/
 COPY entrypoint.sh /opt/
 COPY Dockerfile /my_docker/
